@@ -4,7 +4,7 @@ Created on Fri Oct  5 10:06:19 2018
 
 @author: prachi
 """
-
+#Importing the required packages to make url requests using requests,automation using Selenium and scraping functionalities with the help of lxml and BeautifulSoup
 import requests
 import time as t
 import pandas as pd
@@ -12,13 +12,14 @@ from selenium import webdriver
 from lxml import html
 from bs4 import BeautifulSoup
 
+#Saving the url and finding if we are successful(code 200) in getting the response. If not, exiting the code
 endpoint = "https://spareshub.com/car-brands.html"
 response = requests.get(endpoint)
 if response.status_code != 200:
         print('Failed to retrieve articles with error {}'.format(response.status_code))
         exit()
 
-
+#Creating a soup object from BeautifulSoup and using it to find the required elements in the html page
 soup = BeautifulSoup(response.content, "html.parser")
 brand_store = soup.find('div', attrs={'class': 'block-content toggle-content'})
 brand_urls = brand_store.find_all('a')
@@ -27,19 +28,23 @@ brandurllist = []
 for u in brand_urls:
     brandurllist.append(u.get('href'))
 
+#Creating the list of all brands listed on spareshub
 brandurllist = [x for x in brandurllist if x.endswith('.html')]
 
 
-
+#Assigning the options with which the automated browser window opens up
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument("--start-maximized")
 options.add_argument("--test-type")
 options.add_argument("--headless")
 
+#Looping in the list of brand url's one by one and finding the product details and storing it in a new dictionary brand_to_product_dict where key is brand url and value is list of product urls corresponding to it
 brand_to_product_dict={}
 
 for v in brandurllist:
+
+    #Create a chrome driver for automated browser, the chromedriver.exe file should be present the system for providing the functionality for a Chrome browser and similarly geckodriver.exe for a firefox browser
     driver = webdriver.Chrome(executable_path='C:/Users/prachi/Downloads/chromedriver_win32/chromedriver.exe',chrome_options=options)
     t.sleep(3)
     #driver = webdriver.Firefox(executable_path='C:/Users/imart/Downloads/geckodriver-v0.21.0-win64/geckodriver.exe')
@@ -75,8 +80,11 @@ for v in brandurllist:
     
     driver.quit()
 
+#Creating an empty dataframe to store the fetched information
 finaldf = pd.DataFrame(columns={'Brand','Brand URL','Product Name','Product URL','Product Image','Product Price','Product Specifications','Product Description'})
 i=0
+
+#Iterating over the above dictionary and extracting the product information using each product url
 for key,value in brand_to_product_dict.items():
     
     print(key)
