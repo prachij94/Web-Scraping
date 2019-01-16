@@ -5,7 +5,6 @@ Created on Fri Oct  5 10:06:19 2018
 @author: prachi
 """
 
-#Importing the required packages to make url requests using requests,automation using Selenium and scraping functionalities with the help of lxml and BeautifulSoup
 import requests
 import time as t
 import pandas as pd
@@ -13,15 +12,13 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 from lxml import html
 
-
-#Saving the url and finding if we are successful(code 200) in getting the response. If not, exiting the code
 endpoint = "https://spareshub.com/manufacturers.html"
 response = requests.get(endpoint)
 if response.status_code != 200:
         print('Failed to retrieve articles with error {}'.format(response.status_code))
         exit()
 
-#Creating a soup object from BeautifulSoup and using it to find the required elements in the html page
+
 soup = BeautifulSoup(response.content, "html.parser")
 mfg_store = soup.find('div', attrs={'class': 'col-left-first'})
 mfg_urls = mfg_store.find_all('a')
@@ -30,25 +27,17 @@ mfgurllist = []
 for u in mfg_urls:
     mfgurllist.append(u.get('href'))
 
-
-#Creating the list of all manufacturers listed on spareshub
 mfgurllist = [x for x in mfgurllist if x.endswith('.html')]
 
-
-#Assigning the options with which the automated browser window opens up
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument("--start-maximized")
 options.add_argument("--test-type")
 options.add_argument("--headless")
 
-
-#Looping in the list of manufacturer url's one by one and finding the product details and storing it in a new dictionary mfg_to_product_dict where key is manufacturer url and value is list of product urls corresponding to it
-mfg_to_proExecduct_dict={}
+mfg_to_product_dict={}
 #v=mfgurllist[0]
 for v in mfgurllist:
-
-    #Create a chrome driver for automated browser, the chromedriver.exe file should be present the system for providing the functionality for a Chrome browser and similarly geckodriver.exe for a firefox browser
     driver = webdriver.Chrome(executable_path='C:/Users/prachi/Downloads/chromedriver_win32/chromedriver.exe',chrome_options=options)
     t.sleep(3)
     #driver = webdriver.Firefox(executable_path='C:/Users/imart/Downloads/geckodriver-v0.21.0-win64/geckodriver.exe')
@@ -84,11 +73,8 @@ for v in mfgurllist:
     
     driver.quit()
 
-#Creating an empty dataframe to store the fetched information
 finaldf = pd.DataFrame(columns={'Manufacturer','Manufacturer URL','Product Name','Product URL','Product Image','Product Price','Product Specifications','Product Description'})
 i=0
-
-#Iterating over the above dictionary and extracting the product information using each product url
 for key,value in mfg_to_product_dict.items():
 
     for eachproduct in value:
